@@ -1,0 +1,31 @@
+<div class="d-flex justify-content-center mb-3">
+  <button class="btn btn-primary btn-lg" (click)="openCreateModal()" aria-label="Sukurti naują">
+    <i class="fas fa-plus me-1"></i>
+    Naujas užrašas
+  </button>
+</div>
+
+
+<div class="notes-container">
+  @for (note of notes; track note.id) {
+    <div class="note-card">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">{{ note.title }}</h5>
+          <p class="card-text">{{ note.content }}</p>
+        </div>
+        <div class="card-footer text-end">
+          <button class="btn btn-sm btn-danger" (click)="deleteNote(note.id)">
+            <i class="fas fa-trash-can me-1"></i>
+            Ištrinti
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+@if(notes.length === 0){
+  <div class="alert alert-info text-center">
+    Užrašų nėra
+  </div>
+}
