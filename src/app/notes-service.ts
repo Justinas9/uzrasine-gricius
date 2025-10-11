@@ -1,38 +1,87 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Note } from './note.model';
-import { v4 as uuidv4 } from 'uuid';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap, of } from 'rxjs';
+import { EventEmitter } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotesService {
-  private storageKey = 'notes';
-  private notesSubject = new BehaviorSubject<Note[]>(this.getNotes());
+  private notesSubject = new BehaviorSubject<Note[]>([]);
+  private apiURL = "https://gricius-paskaitos-default-rtdb.europe-west1.firebasedatabase.app/";
+  private isLoading = false;
+  private initialLoadDone = false;
 
+  public onExternalChange = new EventEmitter();
   notes$ = this.notesSubject.asObservable();
 
-  constructor() {}
-
-  getNotes(): Note[] {
-    const notesJson = localStorage.getItem(this.storageKey);
-    return notesJson ? JSON.parse(notesJson) : [];
+  constructor(private http: HttpClient) {
+    this.loadNotes().subscribe();
   }
 
-  private saveNotes(notes: Note[]): void {
-    localStorage.setItem(this.storageKey, JSON.stringify(notes));
-    this.notesSubject.next(notes);
+  loadNotes(): Observable<Note[]> {
+    if (this.isLoading) {
+      return of(this.notesSubject.getValue());
+    }
+
+    this.isLoading = true;
+
+    return this.http.get<{[key: string]: Note}>(`${this.apiURL}/notes.json`)
+      .pipe(
+        map(response => {
+          const notes: Note[] = [];
+          if (response) {
+            for (const key in response) {
+              if (response.hasOwnProperty(key)) {
+                notes.push({
+                  ...response[key],
+                  id: key
+                });
+              }
+            }
+          }
+          this.notesSubject.next(notes);
+          this.initialLoadDone = true;
+          this.isLoading = false;
+          return notes;
+        }),
+        tap({
+          error: () => {
+            this.isLoading = false;
+          }
+        })
+      );
   }
 
-  addNote(title: string, content: string): void {
-    const notes = this.getNotes();
-    const newNote: Note = { id: uuidv4(), title, content };
-    notes.push(newNote);
-    this.saveNotes(notes);
+  getNote(id: string): Observable<Note> {
+    return this.http.get<Note>(`${this.apiURL}/notes/${id}.json`);
   }
 
-  deleteNote(id: string): void {
-    const notes = this.getNotes().filter(note => note.id !== id);
-    this.saveNotes(notes);
+  addNote(title: string, content: string): Observable<any> {
+    const newNote = { title, content };
+    return this.http.post(`${this.apiURL}/notes.json`, newNote)
+      .pipe(
+        tap(response => {
+          const currentNotes = this.notesSubject.getValue();
+          const noteWithId: Note = {
+            id: (response as {name: string}).name,
+            title,
+            content
+          };
+          this.notesSubject.next([...currentNotes, noteWithId]);
+        })
+      );
+  }
+
+  deleteNote(id: string): Observable<any> {
+    return this.http.delete(`${this.apiURL}/notes/${id}.json`)
+      .pipe(
+        tap(() => {
+          const currentNotes = this.notesSubject.getValue();
+          const updatedNotes = currentNotes.filter(note => note.id !== id);
+          this.notesSubject.next(updatedNotes);
+        })
+      );
   }
 }
