@@ -1,0 +1,23 @@
+<div class="container mt-4" *ngIf="!loading">
+  <h3>Redaguoti</h3>
+  <form [formGroup]="noteForm" (ngSubmit)="onSubmit()">
+    <div class="mb-3">
+      <label class="form-label">Pavadinimas</label>
+      <input type="text" class="form-control" formControlName="title" />
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Turinys</label>
+      <textarea
+        class="form-control"
+        rows="5"
+        formControlName="content"
+      ></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Išsaugoti</button>
+    <button type="button" class="btn btn-secondary ms-2" [routerLink]="['/']">
+      Atšaukti
+    </button>
+  </form>
+</div>

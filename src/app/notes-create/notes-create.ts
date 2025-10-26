@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NotesService } from '../notes-service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ModalService } from '../shared/modal.service';
+import { Subscription } from 'rxjs';
 declare var $: any;
 
 @Component({
@@ -11,17 +13,31 @@ declare var $: any;
   templateUrl: './notes-create.html',
   styleUrl: './notes-create.css'
 })
-export class NotesCreate implements OnInit {
+export class NotesCreate implements OnInit, OnDestroy {
   title: string = '';
   content: string = '';
   saving: boolean = false;
+  private modalSubscription: Subscription | null = null;
 
-  constructor(private notesService: NotesService) {}
+  constructor(
+    private notesService: NotesService,
+    private modalService: ModalService
+  ) {}
 
   ngOnInit(): void {
     $('#noteModal').on('shown.bs.modal', () => {
       this.resetForm();
     });
+
+    this.modalSubscription = this.modalService.openCreateModal$.subscribe(() => {
+      $('#noteModal').modal('show');
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.modalSubscription) {
+      this.modalSubscription.unsubscribe();
+    }
   }
 
   resetForm(): void {

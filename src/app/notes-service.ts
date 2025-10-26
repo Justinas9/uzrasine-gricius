@@ -84,4 +84,18 @@ export class NotesService {
         })
       );
   }
+
+  updateNote(id: string, updatedData: Partial<Note>): Observable<any> {
+    return this.http.patch(`${this.apiURL}/notes/${id}.json`, updatedData).pipe(
+      tap(() => {
+        const currentNotes = this.notesSubject.getValue();
+        const updatedNotes = currentNotes.map(note =>
+          note.id === id ? { ...note, ...updatedData } : note
+        );
+        this.notesSubject.next(updatedNotes);
+      })
+    );
+  }
 }
+
+

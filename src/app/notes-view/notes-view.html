@@ -1,11 +1,3 @@
-<div class="d-flex justify-content-center mb-3">
-  <button class="btn btn-primary btn-lg" (click)="openCreateModal()" aria-label="Sukurti naują">
-    <i class="fas fa-plus me-1"></i>
-    Naujas užrašas
-  </button>
-</div>
-
-
 <div class="notes-container">
   @for (note of notes; track note.id) {
     <div class="note-card">
@@ -15,6 +7,13 @@
           <p class="card-text">{{ note.content }}</p>
         </div>
         <div class="card-footer text-end">
+          <button
+            class="btn btn-sm btn-primary me-2"
+            [routerLink]="['/edit', note.id]"
+          >
+            <i class="fas fa-edit me-1"></i>
+            Redaguoti
+          </button>
           <button class="btn btn-sm btn-danger" (click)="deleteNote(note.id)">
             <i class="fas fa-trash-can me-1"></i>
             Ištrinti

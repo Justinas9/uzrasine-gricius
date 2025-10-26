@@ -3,12 +3,13 @@ import { NotesService } from '../notes-service';
 import { Note } from '../note.model';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import {RouterLink} from '@angular/router';
 declare var $: any;
 
 @Component({
   selector: 'app-notes-view',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './notes-view.html',
   styleUrl: './notes-view.css'
 })
@@ -50,9 +51,5 @@ export class NotesView implements OnInit, OnDestroy {
   deleteNote(id: string): void {
     this.notesService.deleteNote(id).subscribe({
     });
-  }
-
-  openCreateModal(): void {
-    $('#noteModal').modal('show');
   }
 }

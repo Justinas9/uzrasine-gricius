@@ -1,10 +1,13 @@
 
 
-<app-notes-create></app-notes-create>
+<app-header></app-header>
 
 <div class="container mt-4">
   <div class="row">
-    <app-notes-view></app-notes-view>
+    <div class="col-md-8 offset-md-2">
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>
 
+<app-notes-create></app-notes-create>
